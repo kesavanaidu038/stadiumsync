@@ -1,14 +1,21 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import { HomePage } from './pages/HomePage';
-import { LoginPage } from './pages/LoginPage';
-import { OrganizerPage } from './pages/OrganizerPage';
-import { VolunteerPage } from './pages/VolunteerPage';
-import { FanPage } from './pages/FanPage';
 import { AppNavBar } from './components/layout/AppNavBar';
 import { ChatBot } from './components/chatbot/ChatBot';
 import { useAppStore } from './store/useAppStore';
+
+const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
+const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
+const OrganizerPage = lazy(() => import('./pages/OrganizerPage').then(m => ({ default: m.OrganizerPage })));
+const VolunteerPage = lazy(() => import('./pages/VolunteerPage').then(m => ({ default: m.VolunteerPage })));
+const FanPage = lazy(() => import('./pages/FanPage').then(m => ({ default: m.FanPage })));
+
+const PageFallback = () => (
+  <div className="min-h-screen bg-[#FFF5E4] flex items-center justify-center">
+    <div className="w-12 h-12 border-4 border-cyber-teal border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 // Simple guard - state is synchronous so no hydration wait needed
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -62,16 +69,18 @@ function App() {
 
   return (
     <HashRouter>
-      <AnimatePresence mode="wait">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/organizer" element={<ProtectedRoute><AppLayout><OrganizerPage /></AppLayout></ProtectedRoute>} />
-          <Route path="/volunteer" element={<ProtectedRoute><AppLayout><VolunteerPage /></AppLayout></ProtectedRoute>} />
-          <Route path="/fan" element={<ProtectedRoute><AppLayout><FanPage /></AppLayout></ProtectedRoute>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AnimatePresence>
+      <Suspense fallback={<PageFallback />}>
+        <AnimatePresence mode="wait">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/organizer" element={<ProtectedRoute><AppLayout><OrganizerPage /></AppLayout></ProtectedRoute>} />
+            <Route path="/volunteer" element={<ProtectedRoute><AppLayout><VolunteerPage /></AppLayout></ProtectedRoute>} />
+            <Route path="/fan" element={<ProtectedRoute><AppLayout><FanPage /></AppLayout></ProtectedRoute>} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AnimatePresence>
+      </Suspense>
     </HashRouter>
   );
 }
