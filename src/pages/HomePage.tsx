@@ -136,7 +136,7 @@ export const HomePage = () => {
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-20">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-cover bg-center opacity-25 mix-blend-multiply pointer-events-none select-none"
-            style={{ backgroundImage: 'url("/images/hero_stadium_floating.jpg")' }} />
+            style={{ backgroundImage: `url("${import.meta.env.BASE_URL}images/hero_stadium_floating.jpg")` }} />
           <div className="absolute inset-0" style={{
             backgroundImage: 'linear-gradient(rgba(255,148,148,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,148,148,0.02) 1px, transparent 1px)',
             backgroundSize: '60px 60px',
@@ -252,7 +252,7 @@ export const HomePage = () => {
             <p className="font-display text-xs text-theme-text-muted font-bold tracking-widest mb-2 uppercase">Platform Details</p>
             
             <div className="mb-6 rounded-xl border border-glass-border overflow-hidden relative shadow-sm">
-              <img src="/images/hero_player_bicycle_kick.jpg" className="w-full h-44 object-cover" alt="Antigravity Action" />
+              <img src={`${import.meta.env.BASE_URL}images/hero_player_bicycle_kick.jpg`} className="w-full h-44 object-cover" alt="Antigravity Action" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#4A3535]/80 to-transparent flex items-end p-4">
                 <span className="font-display text-xs text-[#FFF5E4] font-semibold">FIFA Telemetry Integration</span>
               </div>

@@ -20,7 +20,7 @@ const MatchBanner = () => {
     <div className="glass-panel p-5 h-full flex flex-col justify-between min-h-[160px] pop-card relative overflow-hidden">
       {/* Zero-G Goal Celebration Background */}
       <div className="absolute inset-0 bg-cover bg-center opacity-20 mix-blend-multiply pointer-events-none select-none"
-        style={{ backgroundImage: 'url("/images/goal_celebration.jpg")' }} />
+        style={{ backgroundImage: `url("${import.meta.env.BASE_URL}images/goal_celebration.jpg")` }} />
       <div className="flex items-center gap-2 mb-2 relative z-10">
         {isLive ? (
           <div className="flex items-center gap-1 rounded-full px-2.5 py-0.5 border" style={{ backgroundColor: 'rgba(224,90,71,0.06)', borderColor: 'rgba(224,90,71,0.2)' }}>
@@ -91,7 +91,7 @@ const SeatCard = () => {
     <div className="glass-panel p-5 h-full flex flex-col justify-between min-h-[140px] pop-card relative overflow-hidden">
       {/* Holographic Player Card Portrait Background */}
       <div className="absolute inset-0 bg-cover bg-center opacity-20 mix-blend-multiply pointer-events-none select-none"
-        style={{ backgroundImage: 'url("/images/player_card_portrait.jpg")' }} />
+        style={{ backgroundImage: `url("${import.meta.env.BASE_URL}images/player_card_portrait.jpg")` }} />
       <div className="flex items-center gap-1.5 relative z-10 border-b border-glass-border/30 pb-2"><Star className="w-3.5 h-3.5 text-cyber-purple" /><p className="font-display text-[9px] text-theme-text-muted font-bold uppercase">YOUR SEAT</p></div>
       <div className="relative z-10 mt-1">
         <p className="font-display text-sm font-bold text-theme-text-dark">{userProfile?.seatSection ? userProfile.seatSection.split(",")[0] : "Not set"}</p>
