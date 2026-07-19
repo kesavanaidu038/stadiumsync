@@ -69,33 +69,39 @@ const RoleCard = ({
 const SelectField = ({ label, value, onChange, options }: {
   label: string; value: string; onChange: (v: string) => void;
   options: { value: string; label: string }[];
-}) => (
-  <div>
-    <label className="font-display text-xs text-theme-text-muted mb-1.5 block tracking-widest font-bold">{label}</label>
-    <div className="relative">
-      <select value={value} onChange={e => onChange(e.target.value)}
-        className="w-full bg-[#FFF5E4] border border-glass-border focus:border-cyber-teal/60 rounded-lg px-4 py-2.5 text-theme-text-dark font-display text-xs outline-none appearance-none transition-all duration-200 cursor-pointer font-semibold">
-        {options.map(o => <option key={o.value} value={o.value} className="bg-[#FFF5E4]">{o.label}</option>)}
-      </select>
-      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-text-muted pointer-events-none" />
+}) => {
+  const fieldId = label.toLowerCase().replace(/[^a-z0-9]/g, '-');
+  return (
+    <div>
+      <label htmlFor={fieldId} className="font-display text-xs text-theme-text-muted mb-1.5 block tracking-widest font-bold">{label}</label>
+      <div className="relative">
+        <select id={fieldId} value={value} onChange={e => onChange(e.target.value)}
+          className="w-full bg-[#FFF5E4] border border-glass-border focus:border-cyber-teal/60 rounded-lg px-4 py-2.5 text-theme-text-dark font-display text-xs outline-none appearance-none transition-all duration-200 cursor-pointer font-semibold">
+          {options.map(o => <option key={o.value} value={o.value} className="bg-[#FFF5E4]">{o.label}</option>)}
+        </select>
+        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-text-muted pointer-events-none" />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const TextField = ({ label, placeholder, value, onChange, icon: Icon }: {
   label: string; placeholder: string; value: string;
   onChange: (v: string) => void; icon?: typeof User;
-}) => (
-  <div>
-    <label className="font-display text-xs text-theme-text-muted mb-1.5 block tracking-widest font-bold">{label}</label>
-    <div className="relative">
-      {Icon && <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-text-muted" />}
-      <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-        className={`w-full bg-[#FFF5E4] border border-glass-border focus:border-cyber-teal/60 rounded-lg py-2.5 text-theme-text-dark font-display text-xs outline-none transition-all duration-200 font-semibold ${Icon ? 'pl-9 pr-4' : 'px-4'}`}
-      />
+}) => {
+  const fieldId = label.toLowerCase().replace(/[^a-z0-9]/g, '-');
+  return (
+    <div>
+      <label htmlFor={fieldId} className="font-display text-xs text-theme-text-muted mb-1.5 block tracking-widest font-bold">{label}</label>
+      <div className="relative">
+        {Icon && <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-text-muted" />}
+        <input id={fieldId} type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
+          className={`w-full bg-[#FFF5E4] border border-glass-border focus:border-cyber-teal/60 rounded-lg py-2.5 text-theme-text-dark font-display text-xs outline-none transition-all duration-200 font-semibold ${Icon ? 'pl-9 pr-4' : 'px-4'}`}
+        />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const ProgressBar = ({ step }: { step: Step }) => (
   <div className="flex items-center gap-3 mb-8">

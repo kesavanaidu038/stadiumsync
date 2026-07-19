@@ -57,6 +57,7 @@ export const NavBar = () => {
                 <button
                   key={role.id}
                   onClick={() => setActiveRole(role.id)}
+                  aria-label={`Switch to ${role.label} view`}
                   className={`relative flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-body font-semibold transition-all duration-200 ${
                     isActive
                       ? 'text-cyber-dark'

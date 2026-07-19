@@ -100,7 +100,6 @@ const GateCard = ({ gate, index }: { gate: GateTelemetry; index: number }) => {
 // ── Facility Row ──────────────────────────────────────────
 const FacilityRow = ({ fac }: { fac: FacilityTelemetry }) => {
   const typeIcon = fac.type === 'restroom' ? '🚻' : fac.type === 'concession' ? '🍔' : fac.type === 'medical' ? '🏥' : '🚗';
-  const glow = fac.operationalStatus === 'overloaded' ? 'red' : fac.operationalStatus === 'busy' ? 'amber' : 'none';
 
   return (
     <div className={`flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 ${

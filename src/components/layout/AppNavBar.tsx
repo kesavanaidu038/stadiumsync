@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Activity, LogOut, User, Shield, Users, Ticket, Wifi, Globe } from 'lucide-react';
+import { Activity, LogOut, User, Shield, Users, Ticket, Wifi } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 
 const ROLE_NAV = {
@@ -72,6 +72,7 @@ export const AppNavBar = () => {
                   key={c.name}
                   onClick={() => setActiveTheme(c.name)}
                   title={`Switch theme: ${c.label}`}
+                  aria-label={`Switch theme to ${c.label}`}
                   className={`w-6 h-6 rounded-full flex items-center justify-center text-xs transition-all ${
                     activeTheme === c.name 
                       ? 'bg-glass-bg border border-theme-primary scale-110 shadow-sm' 
@@ -91,6 +92,7 @@ export const AppNavBar = () => {
               onClick={handleLogout}
               whileHover={{ translateY: -1 }}
               whileTap={{ scale: 0.98 }}
+              aria-label="Logout"
               className="flex items-center gap-1 px-3 py-1 rounded-lg border text-xs font-semibold text-cyber-red transition-all"
               style={{ borderColor: 'rgba(224,90,71,0.2)', backgroundColor: 'rgba(224,90,71,0.05)' }}
             >

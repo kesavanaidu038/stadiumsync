@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, X, Send, Bot, User, Loader2, Sparkles, Trash2, ChevronDown } from 'lucide-react';
-import { useAppStore } from '../../store/useAppStore';
+import { useAppStore, type UserProfile } from '../../store/useAppStore';
+import type { StadiumTelemetry, GateTelemetry } from '../../types';
 
 interface Message {
   id: string;
@@ -11,24 +12,24 @@ interface Message {
   isStreaming?: boolean;
 }
 
-const API_KEY = () => (import.meta as any).env.VITE_GEMINI_API_KEY ?? '';
+const API_KEY = () => import.meta.env.VITE_GEMINI_API_KEY ?? '';
 const MODEL = 'gemini-2.5-flash';
 const BASE = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}`;
 
-const buildSystem = (telemetry: any, userProfile: any) =>
+const buildSystem = (telemetry: StadiumTelemetry, userProfile: UserProfile | null) =>
   `You are StadiumSync AI for FIFA World Cup 2026 at ${telemetry.stadiumName}. Role: ${userProfile?.role}.
 Stadium: ${telemetry.overallPercentage}% capacity (${telemetry.currentOccupancy} fans). Incidents: ${telemetry.activeIncidents}.
-Gates: ${telemetry.gates.map((g: any) => `${g.name.split('(')[0].trim()}: ${g.percentage}% [${g.status}]`).join(', ')}.
+Gates: ${telemetry.gates.map((g: GateTelemetry) => `${g.name.split('(')[0].trim()}: ${g.percentage}% [${g.status}]`).join(', ')}.
 User: ${userProfile?.name} | ${userProfile?.role === 'organizer' ? 'Dept: '+userProfile?.department : userProfile?.role === 'volunteer' ? 'Zone: '+userProfile?.zone : 'Seat: '+userProfile?.seatSection}.
 Be concise, action-oriented, cite live data. Under 150 words unless asked for detail. Use bullet points for lists.`;
 
-const generateLocalFallbackResponse = (query: string, telemetry: any, userProfile: any): string => {
+const generateLocalFallbackResponse = (query: string, telemetry: StadiumTelemetry, userProfile: UserProfile | null): string => {
   const q = query.toLowerCase();
   const name = userProfile?.name ?? 'Guest';
   const role = userProfile?.role ?? 'fan';
 
   if (q.includes('gate') || q.includes('entrance') || q.includes('entry') || q.includes('fastest')) {
-    const gatesList = telemetry.gates.map((g: any) => `- **${g.name.split('(')[0].trim()}**: ${g.percentage}% full (${g.status.toUpperCase()})`).join('\n');
+    const gatesList = telemetry.gates.map((g: GateTelemetry) => `- **${g.name.split('(')[0].trim()}**: ${g.percentage}% full (${g.status.toUpperCase()})`).join('\n');
     return `Hi ${name}, here is the live entrance telemetry at ${telemetry.stadiumName}:\n\n${gatesList}\n\n**Tip**: Gate B (Northeast) is currently the fastest route with minimal queue wait times.`;
   }
   if (q.includes('incident') || q.includes('accident') || q.includes('emergency') || q.includes('medical') || q.includes('staff')) {
@@ -106,40 +107,48 @@ export const ChatBot = () => {
       if (!apiKey || apiKey.startsWith('AQ.')) {
         throw new Error('Using fallback local intelligence');
       }
-
-      const res = await fetch(`${BASE}:streamGenerateContent?alt=sse&key=${apiKey}`, {
+      const res = await fetch(`${BASE}:streamGenerateContent?alt=sse&key=${API_KEY()}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: newHistory,
+          contents: [...history, { role: 'user', parts: [{ text: msg }] }],
           system_instruction: { parts: [{ text: buildSystem(telemetry, userProfile) }] },
           generationConfig: { temperature: 0.8, maxOutputTokens: 512 },
         }),
       });
-      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e?.error?.message ?? `HTTP ${res.status}`); }
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error((e as { error?: { message?: string } })?.error?.message ?? `HTTP ${res.status}`); }
       const reader = res.body!.getReader();
       const decoder = new TextDecoder();
       let buf = '', full = '';
-      while (true) {
+      let active = true;
+      while (active) {
         const { done, value } = await reader.read();
-        if (done) break;
+        if (done) {
+          active = false;
+          break;
+        }
         buf += decoder.decode(value, { stream: true });
         const lines = buf.split('\n');
         buf = lines.pop() ?? '';
         for (const line of lines) {
           if (!line.startsWith('data: ')) continue;
           const json = line.slice(6).trim();
-          if (json === '[DONE]') break;
+          if (json === '[DONE]') {
+            active = false;
+            break;
+          }
           try {
             const chunk = JSON.parse(json)?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
             if (chunk) { full += chunk; setMessages(prev => prev.map(m => m.id === aId ? { ...m, content: full } : m)); }
-          } catch {}
+          } catch {
+            // Ignore json parse warnings on streaming chunks
+          }
         }
       }
       setMessages(prev => prev.map(m => m.id === aId ? { ...m, isStreaming: false } : m));
       setHistory([...newHistory, { role: 'model', parts: [{ text: full }] }]);
       setIsLoading(false);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.warn("Gemini API call failed or skipped, falling back to local stadium intelligence:", e);
       const fallbackText = generateLocalFallbackResponse(msg, telemetry, userProfile);
       let index = 0;
@@ -209,10 +218,10 @@ export const ChatBot = () => {
                 <div className="w-1.5 h-1.5 rounded-full bg-cyber-green animate-pulse" />
                 <span className="font-mono text-[10px] text-cyber-green">LIVE</span>
               </div>
-              <button onClick={clearChat} title="Clear" className="p-1.5 rounded-lg hover:bg-white/5 text-slate-500 hover:text-slate-300 transition-colors">
+              <button onClick={clearChat} title="Clear" aria-label="Clear chat history" className="p-1.5 rounded-lg hover:bg-white/5 text-slate-500 hover:text-slate-300 transition-colors">
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
-              <button onClick={() => setIsOpen(false)} className="p-1.5 rounded-lg hover:bg-cyber-red/10 text-slate-500 hover:text-cyber-red transition-colors">
+              <button onClick={() => setIsOpen(false)} aria-label="Close chat window" className="p-1.5 rounded-lg hover:bg-cyber-red/10 text-slate-500 hover:text-cyber-red transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -251,6 +260,7 @@ export const ChatBot = () => {
               {showScrollBtn && (
                 <motion.button initial={{ opacity:0, scale:0.8 }} animate={{ opacity:1, scale:1 }} exit={{ opacity:0, scale:0.8 }}
                   onClick={() => bottomRef.current?.scrollIntoView({ behavior:'smooth' })}
+                  aria-label="Scroll to bottom"
                   className="absolute bottom-24 left-1/2 -translate-x-1/2 bg-cyber-blue border border-glass-border rounded-full p-1.5 shadow-lg z-10">
                   <ChevronDown className="w-4 h-4 text-slate-400" />
                 </motion.button>
@@ -278,6 +288,7 @@ export const ChatBot = () => {
                   className="flex-1 bg-transparent text-xs text-white placeholder-slate-600 font-body outline-none min-w-0"
                 />
                 <button onClick={() => sendMessage()} disabled={!input.trim() || isLoading}
+                  aria-label="Send message"
                   className="w-7 h-7 rounded-lg bg-teal-gradient flex items-center justify-center flex-shrink-0 disabled:opacity-30 hover:shadow-cyber transition-all">
                   {isLoading ? <Loader2 className="w-3.5 h-3.5 text-cyber-dark animate-spin" /> : <Send className="w-3.5 h-3.5 text-cyber-dark" />}
                 </button>

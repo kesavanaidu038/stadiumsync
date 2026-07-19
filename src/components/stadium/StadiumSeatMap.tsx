@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, Ticket, AlertTriangle, Shield, Users, ChevronRight, Star, Zap, MapPin } from 'lucide-react';
+import { Check, Ticket, Shield, Users, ChevronRight, Zap, MapPin } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 
 /* ────────── Types ────────── */

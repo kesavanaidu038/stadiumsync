@@ -1,7 +1,7 @@
 // Gemini REST API service - works with all key formats
 // Uses fetch directly to avoid SDK key format restrictions
 
-const API_KEY = (import.meta as any).env.VITE_GEMINI_API_KEY ?? '';
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY ?? '';
 const MODEL = 'gemini-2.5-flash';
 const BASE_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}`;
 
@@ -56,21 +56,30 @@ async function callGeminiStream(
   const reader = res.body!.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
-  while (true) {
+  let active = true;
+  while (active) {
     const { done, value } = await reader.read();
-    if (done) break;
+    if (done) {
+      active = false;
+      break;
+    }
     buffer += decoder.decode(value, { stream: true });
     const lines = buffer.split('\n');
     buffer = lines.pop() ?? '';
     for (const line of lines) {
       if (!line.startsWith('data: ')) continue;
       const json = line.slice(6).trim();
-      if (json === '[DONE]') return;
+      if (json === '[DONE]') {
+        active = false;
+        return;
+      }
       try {
         const parsed = JSON.parse(json);
         const chunk = parsed?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
         if (chunk) onChunk(chunk);
-      } catch {}
+      } catch {
+        // Ignore json chunk parse errors
+      }
     }
   }
 }
@@ -87,7 +96,11 @@ function parseJSON<T>(text: string, fallback: T): T {
     // If double fenced or raw string matching
     const match = cleaned.match(/\{[\s\S]*\}/) || cleaned.match(/\[[\s\S]*\]/);
     if (match) {
-      try { return JSON.parse(match[0]) as T; } catch {}
+      try {
+        return JSON.parse(match[0]) as T;
+      } catch {
+        // Ignore nested JSON parse errors
+      }
     }
     return fallback;
   }
@@ -149,7 +162,7 @@ Respond ONLY with valid JSON in this exact structure:
 
   try {
     const text = await callGemini(prompt);
-    const parsed = parseJSON<import('../types').CrowdAnalysis>(text, {} as any);
+    const parsed = parseJSON<import('../types').CrowdAnalysis>(text, {} as unknown as import('../types').CrowdAnalysis);
     if (parsed.summary && parsed.strategy && parsed.strategy.length > 0) {
       return { ...parsed, generatedAt: new Date().toISOString() };
     }
@@ -203,7 +216,7 @@ Respond ONLY with a valid JSON array:
 export async function translateAlert(text: string, langCode: string, nativeName: string, langLabel: string): Promise<import('../types').TranslationResult> {
   if (!isConfigured()) {
     return {
-      language: langCode as any,
+      language: langCode as import('../types').SupportedLanguage,
       languageLabel: langLabel,
       originalText: text,
       translatedText: `[Translation to ${langLabel}] ${text}`,
@@ -226,14 +239,14 @@ Respond ONLY with valid JSON:
 
   try {
     const result = await callGemini(prompt);
-    const parsed = parseJSON<any>(result, null);
+    const parsed = parseJSON<import('../types').TranslationResult | null>(result, null);
     if (parsed && parsed.translatedText) {
       return { ...parsed, generatedAt: new Date().toISOString() };
     }
     throw new Error('Bad translation JSON');
   } catch (e) {
     return {
-      language: langCode as any,
+      language: langCode as import('../types').SupportedLanguage,
       languageLabel: langLabel,
       originalText: text,
       translatedText: `[Translated] ${text}`,
@@ -272,7 +285,7 @@ Respond ONLY with valid JSON:
 
   try {
     const result = await callGemini(prompt);
-    const parsed = parseJSON<import('../types').FanRoute>(result, {} as any);
+    const parsed = parseJSON<import('../types').FanRoute>(result, {} as unknown as import('../types').FanRoute);
     if (parsed.recommendedGate && parsed.instructions) {
       return {
         ...parsed,

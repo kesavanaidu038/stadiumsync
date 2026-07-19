@@ -5,7 +5,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  MapPin, Navigation, Clock, ChevronRight, Star, Sparkles, AlertTriangle,
+  MapPin, Navigation, Clock, Star, Sparkles, AlertTriangle,
   ArrowRight, Shield, RotateCcw,
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';

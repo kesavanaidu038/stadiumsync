@@ -20,13 +20,25 @@ const loadAuth = (): { isAuthenticated: boolean; userProfile: UserProfile | null
   try {
     const raw = localStorage.getItem(LS_KEY);
     if (raw) return JSON.parse(raw);
-  } catch {}
+  } catch {
+    // Ignore localStorage read errors (e.g. sandboxed environment)
+  }
   return { isAuthenticated: false, userProfile: null, activeRole: 'organizer' };
 };
 const saveAuth = (isAuthenticated: boolean, userProfile: UserProfile | null, activeRole: Role) => {
-  try { localStorage.setItem(LS_KEY, JSON.stringify({ isAuthenticated, userProfile, activeRole })); } catch {}
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({ isAuthenticated, userProfile, activeRole }));
+  } catch {
+    // Ignore localStorage write failures
+  }
 };
-const clearAuth = () => { try { localStorage.removeItem(LS_KEY); } catch {} };
+const clearAuth = () => {
+  try {
+    localStorage.removeItem(LS_KEY);
+  } catch {
+    // Ignore localStorage clear failures
+  }
+};
 
 const initial = loadAuth();
 

@@ -10,7 +10,6 @@ import { useAppStore } from '../../store/useAppStore';
 import { analyzeCrowd, generateAlerts } from '../../services/geminiService';
 import { GlassPanel } from '../ui/GlassPanel';
 import { SkeletonLoader } from '../ui/SkeletonLoader';
-import { StatusBadge } from '../ui/StatusBadge';
 import type { AnalysisStep } from '../../types';
 
 const PRIORITY_CONFIG = {

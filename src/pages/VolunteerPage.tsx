@@ -59,7 +59,7 @@ const ZoneCard = () => {
         <StatusBadge status="warning" label={zone.substring(0, 8).toUpperCase()} size="sm" />
       </div>
       <div className="space-y-1.5 flex-1">
-        {telemetry.securityZones.slice(0, 3).map((z, i) => {
+        {telemetry.securityZones.slice(0, 3).map(z => {
           const c = colors[z.riskLevel] ?? colors.green;
           return (
             <div key={z.id} className={`flex items-center gap-2 p-2 rounded-lg border ${c.border} ${c.bg} cursor-default`}>

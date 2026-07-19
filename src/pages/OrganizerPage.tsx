@@ -71,7 +71,7 @@ const SecurityTile = ({ index }: { index: number }) => {
         SECURITY ZONES
       </h2>
       <div className="space-y-2 flex-1">
-        {telemetry.securityZones.map((z, zi) => {
+        {telemetry.securityZones.map(z => {
           const c = cfgs[z.riskLevel] ?? cfgs.green;
           return (
             <div key={z.id} className={`flex items-center gap-3 p-2 rounded-lg border ${c.border} ${c.bg} cursor-default`}>

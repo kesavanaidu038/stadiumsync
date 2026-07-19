@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Ticket, Cloud, AlertTriangle, Star, Navigation, ThumbsUp, Radio, LayoutGrid, Sparkles, Map } from "lucide-react";
 import { useAppStore } from "../store/useAppStore";

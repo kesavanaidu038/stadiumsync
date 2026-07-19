@@ -1,7 +1,6 @@
-﻿import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, AlertTriangle, Info, CheckCircle, Clock, MapPin, Sparkles, Loader2, RefreshCw } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
-import { GlassPanel } from '../ui/GlassPanel';
 import { StatusBadge } from '../ui/StatusBadge';
 import { generateAlerts } from '../../services/geminiService';
 import { useState } from 'react';
@@ -61,8 +60,8 @@ export const AlertFeed = () => {
     try {
       const alerts = await generateAlerts(telemetry);
       setAiAlerts(alerts);
-    } catch (e: any) {
-      setErr(e?.message ?? 'Failed to generate alerts');
+    } catch (e) {
+      setErr((e as Error)?.message ?? 'Failed to generate alerts');
     } finally { setLoading(false); }
   };
 

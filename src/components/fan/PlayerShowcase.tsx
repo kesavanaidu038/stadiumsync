@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Accessibility, Globe, ArrowRight, RefreshCw, User, Star } from 'lucide-react';
+import { Globe, ArrowRight, RefreshCw, User } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 
 interface Player {
@@ -101,7 +101,7 @@ export const PlayerShowcase = () => {
   }, [userProfile]);
 
   // Filter players by selected country
-  const filteredPlayers = PLAYERS.filter(p => p.country === selectedCountry);
+  const filteredPlayers = useMemo(() => PLAYERS.filter(p => p.country === selectedCountry), [selectedCountry]);
 
   // Set default selected player when country changes
   useEffect(() => {
@@ -110,7 +110,7 @@ export const PlayerShowcase = () => {
     } else {
       setSelectedId('');
     }
-  }, [selectedCountry]);
+  }, [selectedCountry, filteredPlayers]);
 
   const selectedPlayer = PLAYERS.find(p => p.id === selectedId) || filteredPlayers[0];
   const statKeys: (keyof typeof selectedPlayer.stats)[] = ['speed', 'dribbling', 'shooting', 'passing', 'defense'];
