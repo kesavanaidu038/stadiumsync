@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
@@ -61,7 +61,7 @@ function App() {
   }, [refreshTelemetry, isAuthenticated]);
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <AnimatePresence mode="wait">
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -72,7 +72,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AnimatePresence>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
